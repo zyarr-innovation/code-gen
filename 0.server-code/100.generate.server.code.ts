@@ -1,5 +1,4 @@
 import fs, { stat } from "fs";
-import path from "path";
 
 import { IProperty, IPropertyMap } from "../app.common";
 import { createModelFromObjectMap } from "./0.model";
@@ -19,12 +18,10 @@ function createFile(filePath: string, codeImpl: string) {
   fs.writeFileSync(filePath, codeImpl);
 }
 
-export function generateServerCode(propertyMap: IPropertyMap) {
-  const targetFolder = path.resolve(
-    __dirname,
-    "./server/" + propertyMap.name.toLowerCase()
-  );
-
+export function generateServerCode(
+  targetFolder: string,
+  propertyMap: IPropertyMap
+) {
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder, { recursive: true });
   }
