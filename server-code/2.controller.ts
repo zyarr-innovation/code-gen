@@ -1,6 +1,8 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 
-export function createControllerFromObjectMap(propertyMap: IPropertyMap): string {
+export function createControllerFromObjectMap(
+  propertyMap: IPropertyMap
+): string {
   const className = `Controller${propertyMap.name}`;
   const serviceName = `Service${propertyMap.name}`;
   const validateFunction = `validate${propertyMap.name}`;

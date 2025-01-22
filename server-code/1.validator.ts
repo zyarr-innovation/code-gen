@@ -4,7 +4,7 @@ import {
   IPropertyMap,
   NumberValidation,
   StringValidation,
-} from "./0.common";
+} from "../app.common";
 
 const mapTypeToZod = (key: string, propertyValue: IProperty) => {
   let zodType: string;

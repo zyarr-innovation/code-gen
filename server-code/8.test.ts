@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 
 export function generateRestClientCode(propertyMap: IPropertyMap) {
   const entityName = propertyMap.name.toLowerCase();
@@ -11,7 +11,6 @@ export function generateRestClientCode(propertyMap: IPropertyMap) {
       return acc;
     }, {} as Record<string, any>);
 
-    
   const putPayload = Object.keys(propertyMap.properties).reduce((acc, key) => {
     acc[key] = key === "Id" ? 5 : `${propertyMap.properties[key].value}0`;
     return acc;

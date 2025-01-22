@@ -1,6 +1,8 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 
-export function createServiceModelFromObjectMap(propertyMap: IPropertyMap): string {
+export function createServiceModelFromObjectMap(
+  propertyMap: IPropertyMap
+): string {
   const interfaceName = `IService${propertyMap.name}`;
   const modelImport = `I${propertyMap.name}`;
 

@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap, PropType } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 
 export function createModelFromObjectMap(propertyMap: IPropertyMap): string {
   const { name, properties } = propertyMap;

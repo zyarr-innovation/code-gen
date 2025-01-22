@@ -1,4 +1,4 @@
-import { IPropertyMap } from "./server-code/0.common";
+import { IPropertyMap } from "./app.common";
 import { generateServerCode } from "./server-code/100.generateCode";
 
 const propertyMap: IPropertyMap = {
@@ -70,6 +70,5 @@ const propertyMap: IPropertyMap = {
     },
   },
 };
-
 
 generateServerCode(propertyMap);

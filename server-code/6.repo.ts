@@ -1,4 +1,4 @@
-import { EnumValidation, IProperty, IPropertyMap } from "./0.common";
+import { EnumValidation, IProperty, IPropertyMap } from "../app.common";
 
 export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
   const repoClassName = `Repo${propertyMap.name}Impl`;

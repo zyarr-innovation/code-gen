@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap, PropType } from "./0.common";
+import { IProperty, IPropertyMap, PropType } from "../app.common";
 
 const generatePropertyDefinition = (key: string, property: IProperty) => {
   const dataTypeMap: Record<PropType, string> = {

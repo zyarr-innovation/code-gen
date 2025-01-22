@@ -1,7 +1,7 @@
 import fs, { stat } from "fs";
 import path from "path";
 
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 import { createModelFromObjectMap } from "./0.model";
 import { createValidatorFromObjectMap } from "./1.validator";
 import { createControllerFromObjectMap } from "./2.controller";

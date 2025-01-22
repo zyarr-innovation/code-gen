@@ -1,6 +1,8 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap } from "../app.common";
 
-export function createRepoModelFromObjectMap(propertyMap: IPropertyMap): string {
+export function createRepoModelFromObjectMap(
+  propertyMap: IPropertyMap
+): string {
   const interfaceName = `IRepo${propertyMap.name}`;
   const modelName = `I${propertyMap.name}`;
   const dtoName = `DTO${propertyMap.name}`;
