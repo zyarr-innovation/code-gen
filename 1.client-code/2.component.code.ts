@@ -49,7 +49,10 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   // Generate displayedColumns array
   const generateDisplayedColumns = (): string => {
     return Object.keys(propertyMap.properties)
-      .filter((key) => propertyMap.properties[key].propType !== "object")
+      .filter(
+        (key) =>
+          propertyMap.properties[key].propType !== "object" && key != "Id"
+      )
       .map((key) => `'${key}'`)
       .join(", ");
   };
