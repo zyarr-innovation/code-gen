@@ -2,14 +2,14 @@ import { IProperty, IPropertyMap, EnumValidation } from "../app.common";
 export function createServiceCode(propertyMap: IPropertyMap): string {
   const interfaceName = propertyMap.name;
   const properties = propertyMap.properties;
-  const apiUrl = `data/${interfaceName.toLowerCase()}.json`;
+  const apiUrl = `http://localhost:3000/v1`;
   const className = `${interfaceName}Service`;
 
   // Generate the service class
   const generateServiceClass = (): string => {
     return `import { Injectable } from '@angular/core';
   import { Observable } from 'rxjs';
-  import { HttpClient } from '@angular/common/http';
+  import { HttpClient, HttpHeaders  } from '@angular/common/http';
   import { I${interfaceName} } from './${interfaceName.toLowerCase()}.model';
   
   @Injectable({
@@ -19,28 +19,51 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
     private apiUrl = '${apiUrl}';
     data: I${interfaceName}[] = [];
   
+    // Define the headers
+    private headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      tenantid: 'tenanta',
+      traceparent: '12345',
+      Authorization: 'Bearer Token', // Replace "Token" with your actual token
+    });
+
     constructor(private http: HttpClient) {}
   
-    get(): Observable<I${interfaceName}[]> {
-      return this.http.get<I${interfaceName}[]>(this.apiUrl);
+    getAll(): Observable<I${interfaceName}[]> {
+      return this.http.get<I${interfaceName}[]>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}\`, {
+        headers: this.headers,
+      });
     }
+
+    get(in${interfaceName}Id: number): Observable<IStudent> {
+    return this.http.get<IStudent>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}Id}\`, {
+      headers: this.headers,
+    });
+  }
   
-    add(${interfaceName.toLowerCase()}: I${interfaceName}): Observable<I${interfaceName}> {
+    add(in${interfaceName}: I${interfaceName}): Observable<I${interfaceName}> {
       return this.http.post<I${interfaceName}>(
-        \`\${this.apiUrl}/${interfaceName.toLowerCase()}s\`,
-        ${interfaceName.toLowerCase()}
+        \`\${this.apiUrl}/${interfaceName.toLowerCase()}\`,
+          in${interfaceName}, {
+          headers: this.headers,
+        }
       );
     }
   
-    edit(${interfaceName.toLowerCase()}: I${interfaceName}): Observable<I${interfaceName}> {
+    edit(in${interfaceName}: I${interfaceName}): Observable<I${interfaceName}> {
       return this.http.put<I${interfaceName}>(
-        \`\${this.apiUrl}/${interfaceName.toLowerCase()}s/\${${interfaceName.toLowerCase()}.Id}\`,
-        ${interfaceName.toLowerCase()}
+        \`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}.Id}\`,
+          in${interfaceName}, {
+          headers: this.headers,
+        }
       );
     }
   
-    delete(${interfaceName.toLowerCase()}Id: number): Observable<void> {
-      return this.http.delete<void>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}s/\${${interfaceName.toLowerCase()}Id}\`);
+    delete(in${interfaceName}Id: number): Observable<void> {
+      return this.http.delete<void>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}Id}\`, {
+          headers: this.headers,
+        }
+      );
     }
   }`;
   };

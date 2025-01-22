@@ -10,6 +10,7 @@ export function createServiceModelFromObjectMap(
   import { ${modelImport} } from "./0.model";
 
   export interface ${interfaceName} {
+    getAll(): Promise<${modelImport}[] | null>;
     get(in${propertyMap.name}Id: number): Promise<${modelImport} | null>;
     create(in${propertyMap.name}Info: ${modelImport}): Promise<${modelImport} | null>;
     update(in${propertyMap.name}Id: number, in${propertyMap.name}Info: ${modelImport}): Promise<number>;

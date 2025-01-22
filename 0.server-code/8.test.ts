@@ -2,7 +2,7 @@ import { IProperty, IPropertyMap } from "../app.common";
 
 export function generateRestClientCode(propertyMap: IPropertyMap) {
   const entityName = propertyMap.name.toLowerCase();
-  const baseUrl = `http://localhost:3000/v1/${entityName}`;
+  const baseUrl = `{{baseUrl}}/v1/${entityName}`;
 
   const postPayload = Object.keys(propertyMap.properties)
     .filter((key) => propertyMap.properties[key].isOptional === false)
@@ -17,6 +17,18 @@ export function generateRestClientCode(propertyMap: IPropertyMap) {
   }, {} as Record<string, any>);
 
   return `
+  @baseUrl = http://localhost:3000
+
+  ####
+GET ${baseUrl}
+Content-Type: application/json
+tenantid: tenanta
+traceparent: 12345
+Authorization: bearer Token
+
+ ####
+  # @name Create${propertyMap.name}
+
 POST ${baseUrl}
 Content-Type: application/json
 tenantid: tenanta
@@ -31,15 +43,18 @@ ${JSON.stringify(
   2
 )}
 
+### Capture Id from Response
+@studentId = {{Create${propertyMap.name}.response.body.Id}}
+
 ####
-GET ${baseUrl}/5
+GET ${baseUrl}/{{studentId}}
 Content-Type: application/json
 tenantid: tenanta
 traceparent: 12345
 Authorization: bearer Token
 
 ####
-PUT ${baseUrl}/5
+PUT ${baseUrl}/{{studentId}}
 Content-Type: application/json
 tenantid: tenanta
 traceparent: 12345
@@ -47,7 +62,6 @@ Authorization: bearer Token
 
 ${JSON.stringify(
   {
-    Id: 5,
     ...putPayload,
   },
   null,
@@ -55,7 +69,7 @@ ${JSON.stringify(
 )}
 
 ####
-DELETE ${baseUrl}/4
+DELETE ${baseUrl}/{{studentId}}
 Content-Type: application/json
 tenantid: tenanta
 traceparent: 12345

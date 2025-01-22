@@ -41,6 +41,14 @@ export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
       return found !== null;
     }
 
+    async getAll(): Promise<${modelName}[] | null> {
+      const ${propertyMap.name}Model = this.getModel(${dtoName});
+      const foundObj = await ${propertyMap.name}Model.findAll<${dtoName}>();
+      return foundObj?.map((eachObj) =>
+        this.convertToObject(eachObj.dataValues)
+      );
+    }
+
     async getById(in${
       propertyMap.name
     }Id: number): Promise<${modelName} | null> {
@@ -64,6 +72,7 @@ export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
   }, {
         transaction,
       });
+      createdObj.dataValues.Id = createdObj.Id;
       return this.convertToObject(createdObj.dataValues);
     }
 

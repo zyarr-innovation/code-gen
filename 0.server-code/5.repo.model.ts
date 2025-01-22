@@ -15,6 +15,7 @@ export function createRepoModelFromObjectMap(
 
     export interface ${interfaceName} {
       isExist(in${propertyMap.name}Id: number): Promise<boolean>;
+      getAll(): Promise<${modelName} [] | null>;
       getById(in${propertyMap.name}Id: number): Promise<${modelName} | null>;
       create(
         in${propertyMap.name}: ${modelName},

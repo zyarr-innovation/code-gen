@@ -61,7 +61,7 @@ const mapTypeToZod = (key: string, propertyValue: IProperty) => {
 
   // Handle optional properties
   if (propertyValue.isOptional) {
-    zodType += ".optional()";
+    zodType += ".nullable().optional()";
   }
 
   return `${key}: ${zodType}`;

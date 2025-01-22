@@ -25,6 +25,11 @@ export function createServiceImplFromObjectMap(
       this.repoService = container.get(TYPE.${repoTypeName});
     }
 
+    async getAll(): Promise<${modelName}[] | null> {
+      const retObject = await this.repoService.getAll();
+      return retObject;
+    }
+      
     async get(in${propertyMap.name}Id: number): Promise<${modelName} | null> {
       const retObject = await this.repoService.getById(in${propertyMap.name}Id);
       return retObject;

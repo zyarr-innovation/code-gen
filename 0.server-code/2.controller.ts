@@ -52,6 +52,28 @@ export function createControllerFromObjectMap(
       );
     }
 
+    @httpGet("/")
+    async getAll(@request() req: Request, @response() res: Response) {
+      try {
+        const ${propertyMap.name.toLowerCase()}List = await this.service${
+    propertyMap.name
+  }.getAll();
+        this.logger.info("Retrieved ${propertyMap.name.toLowerCase()}List:" + ${propertyMap.name.toLowerCase()}List?.length );
+
+        this.setCommonHeaders(res);
+        if (!${propertyMap.name.toLowerCase()}List) {
+          return res
+            .status(HttpStatusCode.NOT_FOUND)
+            .json({ message: "${propertyMap.name.toLowerCase()}List not found" });
+        }
+
+        res.status(HttpStatusCode.OK).json(${propertyMap.name.toLowerCase()}List);
+      } catch (error: any) {
+        this.logger.error(error);
+        return this.handleError(error, res);
+      }
+    }
+
     @httpGet("/:id", validateId)
     async get(@request() req: Request, @response() res: Response) {
       try {

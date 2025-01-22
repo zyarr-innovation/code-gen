@@ -106,7 +106,7 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
     }
   
     load${propertyMap.name}s(): void {
-      this.${propertyMap.name.toLowerCase()}Service.get().subscribe((data) => {
+      this.${propertyMap.name.toLowerCase()}Service.getAll().subscribe((data) => {
         this.dataSource = data;
       });
     }
