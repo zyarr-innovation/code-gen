@@ -21,12 +21,10 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
   
     constructor(private http: HttpClient) {}
   
-    // Get all ${interfaceName.toLowerCase()}s
     get(): Observable<I${interfaceName}[]> {
       return this.http.get<I${interfaceName}[]>(this.apiUrl);
     }
   
-    // Add a new ${interfaceName.toLowerCase()}
     add(${interfaceName.toLowerCase()}: I${interfaceName}): Observable<I${interfaceName}> {
       return this.http.post<I${interfaceName}>(
         \`\${this.apiUrl}/${interfaceName.toLowerCase()}s\`,
@@ -34,7 +32,6 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
       );
     }
   
-    // Edit an existing ${interfaceName.toLowerCase()}
     edit(${interfaceName.toLowerCase()}: I${interfaceName}): Observable<I${interfaceName}> {
       return this.http.put<I${interfaceName}>(
         \`\${this.apiUrl}/${interfaceName.toLowerCase()}s/\${${interfaceName.toLowerCase()}.Id}\`,
@@ -42,7 +39,6 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
       );
     }
   
-    // Delete a ${interfaceName.toLowerCase()} by ID
     delete(${interfaceName.toLowerCase()}Id: number): Observable<void> {
       return this.http.delete<void>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}s/\${${interfaceName.toLowerCase()}Id}\`);
     }

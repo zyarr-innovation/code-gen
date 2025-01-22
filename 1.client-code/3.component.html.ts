@@ -9,7 +9,7 @@ import {
 export function createComponentHTML(propertyMap: IPropertyMap): string {
   const generateTableColumns = (): string => {
     return Object.entries(propertyMap.properties)
-      .filter(([_, prop]) => prop.propType !== "object")
+      .filter(([key, prop]) => prop.propType !== "object" && key != "Id")
       .map(
         ([key]) => `
         <ng-container matColumnDef="${key}">
@@ -24,7 +24,7 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
 
   const generateFormFields = (): string => {
     return Object.entries(propertyMap.properties)
-      .filter(([_, prop]) => prop.propType !== "object")
+      .filter(([key, prop]) => prop.propType !== "object" && key != "Id")
       .map(
         ([key]) => `
         <mat-form-field appearance="fill">

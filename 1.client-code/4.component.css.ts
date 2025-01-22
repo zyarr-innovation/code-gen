@@ -7,7 +7,7 @@ import {
 } from "../app.common";
 
 export function createComponentCSS(propertyMap: IPropertyMap): string {
-  const columnCount = Object.keys(propertyMap.properties).length;
+  const columnCount = Object.keys(propertyMap.properties).length - 1;
 
   return `mat-card {
     margin: 20px;
