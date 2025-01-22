@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { EnumValidation, IProperty, IPropertyMap } from "./0.common";
 
 export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
   const repoClassName = `Repo${propertyMap.name}Impl`;
@@ -99,7 +99,23 @@ export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
     convertToObject(srcObject: ${dtoName}): ${modelName} {
       return {
   ${Object.keys(propertyMap.properties)
-    .map((key) => `      ${key}: srcObject.${key},`)
+    .map((key) => {
+      const property = propertyMap.properties[key];
+      let value = `srcObject.${key}`;
+
+      // Check if the property is an enum and handle accordingly
+      if (property.propType === "enum") {
+        // Assuming the enum values are defined in the property validation
+        let validator = property.validation as EnumValidation;
+        const enumValues = validator?.values || [];
+        const enumCheck = enumValues.map((v) => `"${v}"`).join(" | ");
+
+        // Ensure the value is one of the enum values
+        value = `(${value} as ${enumCheck})`;
+      }
+
+      return `      ${key}: ${value},`;
+    })
     .join("\n")}
       };
     }
