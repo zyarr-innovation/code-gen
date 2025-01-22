@@ -5,12 +5,13 @@ export function generateRestClientCode(propertyMap: IPropertyMap) {
   const baseUrl = `http://localhost:3000/v1/${entityName}`;
 
   const postPayload = Object.keys(propertyMap.properties)
-    .filter((key) => propertyMap.properties[key].type === "required")
+    .filter((key) => propertyMap.properties[key].isOptional === false)
     .reduce((acc, key) => {
       acc[key] = propertyMap.properties[key].value;
       return acc;
     }, {} as Record<string, any>);
 
+    
   const putPayload = Object.keys(propertyMap.properties).reduce((acc, key) => {
     acc[key] = key === "Id" ? 5 : `${propertyMap.properties[key].value}0`;
     return acc;

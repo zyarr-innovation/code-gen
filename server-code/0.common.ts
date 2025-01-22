@@ -1,8 +1,27 @@
-export type PropertyType = "required" | "optional";
+export type PropType = "string" | "number" | "boolean" | "object" | "enum";
+
+export interface StringValidation {
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+}
+
+export interface NumberValidation {
+  min?: number;
+  max?: number;
+}
+
+export interface EnumValidation {
+  values: (string | number | boolean)[]; // Possible values for the enum
+}
 
 export interface IProperty {
-  value: string | number | boolean | object | null; // Extendable for more types
-  type: PropertyType;
+  value: string | number | boolean | object | null; // Default value
+  isOptional: boolean; // Indicates if the property is optional
+  propType: PropType; // Specifies the type of the property
+  isArray?: boolean; // Flag for arrays
+  validation?: StringValidation | NumberValidation | EnumValidation; // Validation rules
+  nestedMap?: IPropertyMap; // Nested object validation
 }
 
 export interface IPropertyMap {

@@ -1,34 +1,39 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import { IProperty, IPropertyMap, PropType } from "./0.common";
 
 const generatePropertyDefinition = (key: string, property: IProperty) => {
-  const dataTypeMap: Record<string, string> = {
+  const dataTypeMap: Record<PropType, string> = {
     string: "DataTypes.STRING",
     number: "DataTypes.INTEGER",
     boolean: "DataTypes.BOOLEAN",
     object: "DataTypes.JSON",
-    array: "DataTypes.ARRAY(DataTypes.STRING)",
+    enum: "DataTypes.ENUM",
   };
 
-  const type: keyof typeof dataTypeMap = Array.isArray(property.value)
-    ? "array"
-    : typeof property.value === "object" && property.value !== null
-    ? "object"
-    : typeof property.value;
+  // Determine if the property is an array
+  const isArray = property.isArray
+    ? `DataTypes.ARRAY(${dataTypeMap[property.propType]})`
+    : dataTypeMap[property.propType];
 
-  const normalValue = `{
-    type: ${dataTypeMap[type] || "DataTypes.STRING"},
-    allowNull: ${property.type === "required" ? "false" : "true"},
-  }`;
+  // Handling ENUM type
+  const enumValues =
+    property.propType === "enum" && property.validation
+      ? (
+          property.validation as { values: (string | number | boolean)[] }
+        ).values
+          .map((v) => `'${v}'`)
+          .join(", ")
+      : null;
 
-  const primaryValue = `{
-    type: ${dataTypeMap[type] || "DataTypes.STRING"},
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true, 
+  const fieldType = enumValues ? `DataTypes.ENUM(${enumValues})` : isArray;
+
+  const definition = `{
+    type: ${fieldType || "DataTypes.STRING"},
+    allowNull: ${property.isOptional ? "true" : "false"},
+    ${key === "Id" ? "autoIncrement: true,\n    primaryKey: true," : ""}
   }`;
 
   return `
-        ${key}: ${key == "Id" ? primaryValue : normalValue},`;
+        ${key}: ${definition},`;
 };
 
 export function createDtoModelFromObjectMap(propertyMap: IPropertyMap): string {
@@ -44,8 +49,8 @@ export function createDtoModelFromObjectMap(propertyMap: IPropertyMap): string {
     .map(
       (key) =>
         `  ${key}${
-          propertyMap.properties[key].type === "optional" ? "?" : "!"
-        }: ${typeof propertyMap.properties[key].value};`
+          propertyMap.properties[key].isOptional ? "?" : "!"
+        }: ${getTypeScriptType(propertyMap.properties[key])};`
     )
     .join("\n")}
   }
@@ -71,3 +76,28 @@ export function createDtoModelFromObjectMap(propertyMap: IPropertyMap): string {
 
   return dtoModelCode;
 }
+
+// Helper function to map PropType to TypeScript types
+const getTypeScriptType = (property: IProperty): string => {
+  if (property.isArray) {
+    return `${mapPropTypeToTsType(property.propType)}[]`;
+  }
+  return mapPropTypeToTsType(property.propType);
+};
+
+const mapPropTypeToTsType = (propType: PropType): string => {
+  switch (propType) {
+    case "string":
+      return "string";
+    case "number":
+      return "number";
+    case "boolean":
+      return "boolean";
+    case "object":
+      return "Record<string, any>";
+    case "enum":
+      return "string | number | boolean"; // Adjust if enums are stricter
+    default:
+      return "any";
+  }
+};

@@ -1,45 +1,88 @@
-import { IProperty, IPropertyMap } from "./0.common";
+import {
+  EnumValidation,
+  IProperty,
+  IPropertyMap,
+  NumberValidation,
+  StringValidation,
+} from "./0.common";
 
 const mapTypeToZod = (key: string, propertyValue: IProperty) => {
-  const baseType = typeof propertyValue.value;
-  let zodType;
+  let zodType: string;
 
-  switch (baseType) {
+  // Map propType to Zod type
+  switch (propertyValue.propType) {
     case "string":
       zodType = "z.string()";
+      let validatorStr = propertyValue.validation as StringValidation;
+      if (validatorStr?.minLength) {
+        zodType += `.min(${validatorStr.minLength})`;
+      }
+      if (validatorStr?.maxLength) {
+        zodType += `.max(${validatorStr.maxLength})`;
+      }
+      if (validatorStr?.pattern) {
+        zodType += `.regex(${validatorStr.pattern})`;
+      }
       break;
     case "number":
       zodType = "z.number()";
+      let validatorNum = propertyValue.validation as NumberValidation;
+      if (validatorNum?.min) {
+        zodType += `.min(${validatorNum.min})`;
+      }
+      if (validatorNum?.max) {
+        zodType += `.max(${validatorNum.max})`;
+      }
       break;
     case "boolean":
       zodType = "z.boolean()";
       break;
+    case "enum":
+      let validatorEnum = propertyValue.validation as EnumValidation;
+      zodType = `z.enum([${validatorEnum?.values
+        ?.map((v) => `"${v}"`)
+        .join(", ")}])`;
+      break;
     case "object":
-      if (Array.isArray(propertyValue.value)) {
-        zodType = `z.array(z.string())`; // Assuming arrays contain strings
-      } else if (propertyValue.value === null) {
-        zodType = "z.string().nullable()"; // Null represents an unknown or any type
+      if (propertyValue.nestedMap) {
+        zodType = `z.lazy(() => ${propertyValue.nestedMap.name.toLowerCase()}Schema)`;
       } else {
-        zodType = "z.object({})"; // Simplified for nested objects
+        zodType = "z.object({})"; // Generic object type
       }
       break;
     default:
       zodType = "z.any()"; // Fallback for unrecognized types
   }
 
-  if (propertyValue.type === "optional") {
+  // Handle arrays
+  if (propertyValue.isArray) {
+    zodType = `z.array(${zodType})`;
+  }
+
+  // Handle optional properties
+  if (propertyValue.isOptional) {
     zodType += ".optional()";
   }
 
   return `${key}: ${zodType}`;
 };
 
-// Generate zod schema
-const generateZodSchema = (propertyMap: IPropertyMap) => {
+// Generate Zod schema
+const generateZodSchema = (propertyMap: IPropertyMap): string => {
+  const nestedSchemas = Object.values(propertyMap.properties)
+    .filter((property) => property.nestedMap)
+    .map((property) => generateZodSchema(property.nestedMap!))
+    .join("\n\n");
+
   const schemaFields = Object.entries(propertyMap.properties)
     .map(([key, value]) => mapTypeToZod(key, value))
     .join(",\n  ");
-  return `const ${propertyMap.name.toLowerCase()}Schema = z.object({\n  ${schemaFields}\n});`;
+
+  const schemaName = `${propertyMap.name.toLowerCase()}Schema`;
+
+  const schema = `const ${schemaName} = z.object({\n  ${schemaFields}\n});`;
+
+  return nestedSchemas ? `${nestedSchemas}\n\n${schema}` : schema;
 };
 
 export function createValidatorFromObjectMap(
