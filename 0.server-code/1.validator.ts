@@ -21,7 +21,7 @@ const mapTypeToZod = (key: string, propertyValue: IProperty) => {
         zodType += `.max(${validatorStr.maxLength})`;
       }
       if (validatorStr?.pattern) {
-        zodType += `.regex(${validatorStr.pattern})`;
+        zodType += `.regex(/${validatorStr.pattern}/)`;
       }
       break;
     case "number":
