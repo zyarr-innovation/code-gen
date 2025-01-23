@@ -39,13 +39,16 @@ const generatePropertyDefinition = (key: string, property: IProperty) => {
     }`;
   } else if (property.isForeign) {
     definition = `{
-      type : DataTypes.INTEGER, // Define as an integer for foreign key
-      allowNull : false,
-      references: {
-        model: '${key}', // Name of the referenced table
-        key: 'Id', // Key in the referenced table
-      }
-    }`;
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: {
+            schema: schemaName,
+            tableName: "${key}",
+          },
+          key: "Id",
+        },
+      }`;
   }
 
   return `

@@ -70,6 +70,7 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   import { MatTableModule } from '@angular/material/table';
   import { MatFormFieldModule } from '@angular/material/form-field';
   import { MatInputModule } from '@angular/material/input';
+  import { Router } from '@angular/router';
   import { ${modelName} } from './${modelFileName}';
   import { ${serviceName} } from './${serviceFileName}';
   
@@ -96,8 +97,9 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
     ${propertyMap.name.toLowerCase()}Form!: FormGroup;
   
     constructor(
-      private ${propertyMap.name.toLowerCase()}Service: ${serviceName},
-      private fb: FormBuilder
+      private fb: FormBuilder,
+      private router: Router,
+      private ${propertyMap.name.toLowerCase()}Service: ${serviceName}
     ) {}
   
     ngOnInit(): void {
