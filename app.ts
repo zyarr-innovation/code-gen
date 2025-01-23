@@ -11,6 +11,7 @@ const propertyMap: IPropertyMap = {
       isOptional: true,
       propType: "number",
       validation: { min: 1, max: 9999 },
+      isPrimary: true,
     },
     name: {
       value: "John Doe",
@@ -26,9 +27,10 @@ const propertyMap: IPropertyMap = {
     },
     school: {
       value: "ABC High School",
-      isOptional: false,
-      propType: "string",
-      validation: { minLength: 3, maxLength: 255 },
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isForeign: true,
     },
   },
 };

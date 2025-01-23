@@ -9,12 +9,10 @@ const generatePropertyDefinition = (key: string, property: IProperty) => {
     enum: "DataTypes.ENUM",
   };
 
-  // Determine if the property is an array
   const isArray = property.isArray
     ? `DataTypes.ARRAY(${dataTypeMap[property.propType]})`
     : dataTypeMap[property.propType];
 
-  // Handling ENUM type
   const enumValues =
     property.propType === "enum" && property.validation
       ? (
@@ -26,11 +24,29 @@ const generatePropertyDefinition = (key: string, property: IProperty) => {
 
   const fieldType = enumValues ? `DataTypes.ENUM(${enumValues})` : isArray;
 
-  const definition = `{
+  let definition = `{
     type: ${fieldType || "DataTypes.STRING"},
     allowNull: ${property.isOptional ? "true" : "false"},
     ${key === "Id" ? "autoIncrement: true,\n    primaryKey: true," : ""}
   }`;
+
+  if (property.isPrimary) {
+    definition = `{
+      type : DataTypes.INTEGER,
+      allowNull : true,
+      autoIncrement : true,
+      primaryKey : true,
+    }`;
+  } else if (property.isForeign) {
+    definition = `{
+      type : DataTypes.INTEGER, // Define as an integer for foreign key
+      allowNull : false,
+      references: {
+        model: '${key}', // Name of the referenced table
+        key: 'Id', // Key in the referenced table
+      }
+    }`;
+  }
 
   return `
         ${key}: ${definition},`;

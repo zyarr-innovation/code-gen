@@ -44,11 +44,7 @@ const mapTypeToZod = (key: string, propertyValue: IProperty) => {
         .join(", ")}])`;
       break;
     case "object":
-      if (propertyValue.nestedMap) {
-        zodType = `z.lazy(() => ${propertyValue.nestedMap.name.toLowerCase()}Schema)`;
-      } else {
-        zodType = "z.object({})"; // Generic object type
-      }
+      zodType = "z.object({})"; // Generic object type
       break;
     default:
       zodType = "z.any()"; // Fallback for unrecognized types
@@ -69,20 +65,13 @@ const mapTypeToZod = (key: string, propertyValue: IProperty) => {
 
 // Generate Zod schema
 const generateZodSchema = (propertyMap: IPropertyMap): string => {
-  const nestedSchemas = Object.values(propertyMap.properties)
-    .filter((property) => property.nestedMap)
-    .map((property) => generateZodSchema(property.nestedMap!))
-    .join("\n\n");
-
   const schemaFields = Object.entries(propertyMap.properties)
     .map(([key, value]) => mapTypeToZod(key, value))
     .join(",\n  ");
 
   const schemaName = `${propertyMap.name.toLowerCase()}Schema`;
-
   const schema = `const ${schemaName} = z.object({\n  ${schemaFields}\n});`;
-
-  return nestedSchemas ? `${nestedSchemas}\n\n${schema}` : schema;
+  return schema;
 };
 
 export function createValidatorFromObjectMap(

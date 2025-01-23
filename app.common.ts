@@ -21,7 +21,8 @@ export interface IProperty {
   propType: PropType; // Specifies the type of the property
   isArray?: boolean; // Flag for arrays
   validation?: StringValidation | NumberValidation | EnumValidation; // Validation rules
-  nestedMap?: IPropertyMap; // Nested object validation
+  isPrimary?: boolean;
+  isForeign?: boolean
 }
 
 export interface IPropertyMap {

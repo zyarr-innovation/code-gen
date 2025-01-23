@@ -28,11 +28,6 @@ const getTypeScriptType = (property: IProperty): string => {
     case "boolean":
       return isArray ? "boolean[]" : "boolean";
     case "object":
-      if (property.nestedMap) {
-        return isArray
-          ? `I${property.nestedMap.name}[]`
-          : `I${property.nestedMap.name}`;
-      }
       return isArray ? "Record<string, any>[]" : "Record<string, any>";
     case "enum":
       if (validation && "values" in validation) {
