@@ -7,11 +7,11 @@ import { generateClientCode } from "./1.client-code/100.generate.client.code";
 export function generateCode(propertyMap: IPropertyMap) {
   const targetServerFolder = path.resolve(
     __dirname,
-    "./server/" + propertyMap.name.toLowerCase()
+    "./test/server/" + propertyMap.name.toLowerCase()
   );
   const targetClientFolder = path.resolve(
     __dirname,
-    "./client/" + propertyMap.name.toLowerCase()
+    "./test/client/" + propertyMap.name.toLowerCase()
   );
 
   generateServerCode(targetServerFolder, propertyMap);

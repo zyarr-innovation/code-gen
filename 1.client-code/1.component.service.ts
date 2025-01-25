@@ -1,9 +1,42 @@
-import { IProperty, IPropertyMap, EnumValidation } from "../app.common";
+import {
+  IProperty,
+  IPropertyMap,
+  EnumValidation,
+  capitalizeFirstLetter,
+} from "../app.common";
 export function createServiceCode(propertyMap: IPropertyMap): string {
   const interfaceName = propertyMap.name;
   const properties = propertyMap.properties;
   const apiUrl = `http://localhost:3000/v1`;
   const className = `${interfaceName}Service`;
+
+  const generateForeignAttributes = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `${key}Id: number = 0; `)
+      .join("\n");
+  };
+
+  const generateForeignParams = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `in${capitalizeFirstLetter(key)}Id: number`)
+      .join(",");
+  };
+
+  const generateForeignParamsAssignment = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `this.${key}Id = in${capitalizeFirstLetter(key)}Id;`)
+      .join("\n");
+  };
+
+  const generateForeignParamsUrl = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `/${key}/\$\{in${capitalizeFirstLetter(key)}Id\}`)
+      .join("");
+  };
 
   // Generate the service class
   const generateServiceClass = (): string => {
@@ -17,6 +50,7 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
   })
   export class ${className} {
     private apiUrl = '${apiUrl}';
+    ${generateForeignAttributes()}
     data: I${interfaceName}[] = [];
   
     // Define the headers
@@ -29,8 +63,9 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
 
     constructor(private http: HttpClient) {}
   
-    getAll(): Observable<I${interfaceName}[]> {
-      return this.http.get<I${interfaceName}[]>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}\`, {
+    getAll(${generateForeignParams()}): Observable<I${interfaceName}[]> {
+      ${generateForeignParamsAssignment()}
+      return this.http.get<I${interfaceName}[]>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}${generateForeignParamsUrl()}\`, {
         headers: this.headers,
       });
     }

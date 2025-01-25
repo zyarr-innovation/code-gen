@@ -13,9 +13,55 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   const modelFileName = `${propertyMap.name.toLowerCase()}.model`;
   const serviceFileName = `${propertyMap.name.toLowerCase()}.service`;
 
-  // Generate FormGroup fields
+  const generateForeignAttributes = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `@Input() ${key}Id = 0; `)
+      .join("\n");
+  };
+
+  const generateOnInitCode = (): string => {
+    let entries = Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `this.${key}Id = +params['${key}Id']; `)
+      .join("\n");
+
+    return entries != ""
+      ? `
+          this.route.params.subscribe((params) => {
+            ${entries}
+            this.load${propertyMap.name}s();
+            this.initForm();
+          });
+        `
+      : `
+        this.load${propertyMap.name}s();
+        this.initForm();
+        `;
+  };
+
+  const generateForeignIds = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `this.${key}Id`)
+      .join(",");
+  };
+
+  const generateForeignValues = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(([key]) => `${key}: this.${key}Id`)
+      .join(",");
+  };
+
   const generateFormGroupFields = (): string => {
     return Object.entries(propertyMap.properties)
+      .filter(
+        ([key, prop]) =>
+          propertyMap.properties[key].propType !== "object" &&
+          !prop.isPrimary &&
+          !prop.isForeign
+      )
       .map(([key, prop]: [string, IProperty]) => {
         const validators: string[] = [];
 
@@ -46,19 +92,20 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
       .join(",\n      ");
   };
 
-  // Generate displayedColumns array
   const generateDisplayedColumns = (): string => {
-    return Object.keys(propertyMap.properties)
+    return Object.entries(propertyMap.properties)
       .filter(
-        (key) =>
-          propertyMap.properties[key].propType !== "object" && key != "Id"
+        ([key, prop]) =>
+          propertyMap.properties[key].propType !== "object" &&
+          !prop.isPrimary &&
+          !prop.isForeign
       )
-      .map((key) => `'${key}'`)
+      .map(([key, prop]) => `'${key}'`)
       .join(", ");
   };
 
   return `import { CommonModule } from '@angular/common';
-  import { Component, OnInit } from '@angular/core';
+  import { Component, Input, OnInit } from '@angular/core';
   import {
     ReactiveFormsModule,
     FormBuilder,
@@ -71,6 +118,7 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   import { MatFormFieldModule } from '@angular/material/form-field';
   import { MatInputModule } from '@angular/material/input';
   import { Router } from '@angular/router';
+  import { ActivatedRoute } from '@angular/router';
   import { ${modelName} } from './${modelFileName}';
   import { ${serviceName} } from './${serviceFileName}';
   
@@ -89,6 +137,8 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
     styleUrls: ['./${propertyMap.name.toLowerCase()}.component.css'],
   })
   export class ${className} implements OnInit {
+    ${generateForeignAttributes()}
+    
     displayedColumns: string[] = [${generateDisplayedColumns()}, 'actions'];
     dataSource: ${modelName}[] = [];
     isFormVisible = false;
@@ -98,23 +148,24 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   
     constructor(
       private fb: FormBuilder,
+      private route: ActivatedRoute,
       private router: Router,
       private ${propertyMap.name.toLowerCase()}Service: ${serviceName}
     ) {}
   
     ngOnInit(): void {
-      this.load${propertyMap.name}s();
-      this.initForm();
+      ${generateOnInitCode()}
     }
   
     load${propertyMap.name}s(): void {
-      this.${propertyMap.name.toLowerCase()}Service.getAll().subscribe((data) => {
+      this.${propertyMap.name.toLowerCase()}Service.getAll(${generateForeignIds()}).subscribe((data) => {
         this.dataSource = data;
       });
     }
   
     initForm(): void {
       this.${propertyMap.name.toLowerCase()}Form = this.fb.group({
+        Id: [null, []],
         ${generateFormGroupFields()}
       });
     }
@@ -146,7 +197,8 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
   
     onSubmit(): void {
       if (this.${propertyMap.name.toLowerCase()}Form.valid) {
-        const ${propertyMap.name.toLowerCase()} = this.${propertyMap.name.toLowerCase()}Form.value;
+        const ${propertyMap.name.toLowerCase()} = { ...this.${propertyMap.name.toLowerCase()}Form.value, ${generateForeignValues()} };
+
         if (this.isEditMode) {
           this.${propertyMap.name.toLowerCase()}Service.edit(${propertyMap.name.toLowerCase()}).subscribe(() => {
             this.load${propertyMap.name}s();

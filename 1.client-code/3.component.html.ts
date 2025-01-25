@@ -7,9 +7,24 @@ import {
 } from "../app.common";
 
 export function createComponentHTML(propertyMap: IPropertyMap): string {
+  const generateForeignButton = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.isForeign)
+      .map(
+        ([key]) => `
+        <button mat-icon-button color="primary" (click)="show${key}(element.Id)">
+          <mat-icon>list_alt</mat-icon>
+        </button>`
+      )
+      .join("\n");
+  };
+
   const generateTableColumns = (): string => {
     return Object.entries(propertyMap.properties)
-      .filter(([key, prop]) => prop.propType !== "object" && key != "Id")
+      .filter(
+        ([key, prop]) =>
+          prop.propType !== "object" && !prop.isPrimary && !prop.isForeign
+      )
       .map(
         ([key]) => `
         <ng-container matColumnDef="${key}">
@@ -24,7 +39,10 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
 
   const generateFormFields = (): string => {
     return Object.entries(propertyMap.properties)
-      .filter(([key, prop]) => prop.propType !== "object" && key != "Id")
+      .filter(
+        ([key, prop]) =>
+          prop.propType !== "object" && !prop.isPrimary && !prop.isForeign
+      )
       .map(
         ([key]) => `
         <mat-form-field appearance="fill">
@@ -59,6 +77,7 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
             }(element.Id)">
               <mat-icon>delete</mat-icon>
             </button>
+            ${generateForeignButton()}
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
