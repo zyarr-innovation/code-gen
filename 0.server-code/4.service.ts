@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap } from "../app.common";
+import { capitalizeFirstLetter, IProperty, IPropertyMap } from "../app.common";
 
 export function createServiceImplFromObjectMap(
   propertyMap: IPropertyMap
@@ -9,6 +9,16 @@ export function createServiceImplFromObjectMap(
   const repoInterfaceName = `IRepo${propertyMap.name}`;
   const repoTypeName = `Repo${propertyMap.name}`;
 
+  let getAllParam = "";
+  let isForeignKeyPresent = false;
+  Object.entries(propertyMap.properties).forEach(([key, definition]) => {
+    if (definition.isForeign) {
+      getAllParam += `in${capitalizeFirstLetter(key)}Id: number, `;
+      isForeignKeyPresent = true;
+    }
+  });
+  getAllParam = getAllParam.trim().replace(/,\s*$/, "");
+
   const serviceImplementationCode = `
   import { inject } from "inversify";
   import TYPE from "../ioc/types";
@@ -18,6 +28,7 @@ export function createServiceImplFromObjectMap(
   import { ${interfaceName} } from "./3.service.model";
   import { ${repoInterfaceName} } from "./5.repo.model";
 
+  
   export class ${serviceName} implements ${interfaceName} {
     private repoService!: ${repoInterfaceName};
 
@@ -25,8 +36,12 @@ export function createServiceImplFromObjectMap(
       this.repoService = container.get(TYPE.${repoTypeName});
     }
 
-    async getAll(): Promise<${modelName}[] | null> {
-      const retObject = await this.repoService.getAll();
+    async getAll(${
+      isForeignKeyPresent ? getAllParam : ""
+    }): Promise<${modelName}[] | null> {
+      const retObject = await this.repoService.getAll(${
+        isForeignKeyPresent ? getAllParam.replace(/: number/g, "") : ""
+      });
       return retObject;
     }
       
@@ -35,13 +50,21 @@ export function createServiceImplFromObjectMap(
       return retObject;
     }
 
-    async create(in${propertyMap.name}Info: ${modelName}): Promise<${modelName} | null> {
-      const retObject = await this.repoService.create(in${propertyMap.name}Info);
+    async create(in${
+      propertyMap.name
+    }Info: ${modelName}): Promise<${modelName} | null> {
+      const retObject = await this.repoService.create(in${
+        propertyMap.name
+      }Info);
       return retObject;
     }
 
-    async update(in${propertyMap.name}Id: number, in${propertyMap.name}Info: ${modelName}): Promise<number> {
-      const retObject = await this.repoService.update(in${propertyMap.name}Id, in${propertyMap.name}Info);
+    async update(in${propertyMap.name}Id: number, in${
+    propertyMap.name
+  }Info: ${modelName}): Promise<number> {
+      const retObject = await this.repoService.update(in${
+        propertyMap.name
+      }Id, in${propertyMap.name}Info);
       return retObject;
     }
 

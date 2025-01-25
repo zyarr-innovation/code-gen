@@ -1,10 +1,29 @@
-import { EnumValidation, IProperty, IPropertyMap } from "../app.common";
+import {
+  capitalizeFirstLetter,
+  EnumValidation,
+  IProperty,
+  IPropertyMap,
+} from "../app.common";
 
 export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
   const repoClassName = `Repo${propertyMap.name}Impl`;
   const interfaceName = `IRepo${propertyMap.name}`;
   const modelName = `I${propertyMap.name}`;
   const dtoName = `DTO${propertyMap.name}`;
+
+  let getAllParam = "";
+  let whereClause = "{ where: { ";
+  let isForeignKeyPresent = false;
+  Object.entries(propertyMap.properties).forEach(([key, definition]) => {
+    if (definition.isForeign) {
+      getAllParam += `in${capitalizeFirstLetter(key)}Id: number, `;
+      whereClause += `${key}: in${capitalizeFirstLetter(key)}Id, `;
+      isForeignKeyPresent = true;
+    }
+  });
+  getAllParam = getAllParam.trim().replace(/,\s*$/, "");
+  whereClause = whereClause.trim().replace(/,\s*$/, "");
+  whereClause += " } }";
 
   const repositoryImplementationCode = `
   import { Model, Sequelize, Transaction } from "sequelize";
@@ -41,9 +60,13 @@ export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
       return found !== null;
     }
 
-    async getAll(): Promise<${modelName}[] | null> {
+    async getAll(${
+      isForeignKeyPresent ? getAllParam : ""
+    }): Promise<${modelName}[] | null> {
       const ${propertyMap.name}Model = this.getModel(${dtoName});
-      const foundObj = await ${propertyMap.name}Model.findAll<${dtoName}>();
+      const foundObj = await ${propertyMap.name}Model.findAll<${dtoName}>(${
+    isForeignKeyPresent ? whereClause : ""
+  });
       return foundObj?.map((eachObj) =>
         this.convertToObject(eachObj.dataValues)
       );

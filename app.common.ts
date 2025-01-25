@@ -22,10 +22,14 @@ export interface IProperty {
   isArray?: boolean; // Flag for arrays
   validation?: StringValidation | NumberValidation | EnumValidation; // Validation rules
   isPrimary?: boolean;
-  isForeign?: boolean
+  isForeign?: boolean;
 }
 
 export interface IPropertyMap {
   name: string; // Name of the interface
   properties: { [key: string]: IProperty }; // Properties of the interface
+}
+
+export function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

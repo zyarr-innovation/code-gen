@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap } from "../app.common";
+import { capitalizeFirstLetter, IProperty, IPropertyMap } from "../app.common";
 
 export function createControllerFromObjectMap(
   propertyMap: IPropertyMap
@@ -7,6 +7,21 @@ export function createControllerFromObjectMap(
   const serviceName = `Service${propertyMap.name}`;
   const validateFunction = `validate${propertyMap.name}`;
   const modelInterface = `I${propertyMap.name}`;
+
+  let getUrlParam = "";
+  let getParamId = "";
+  let inParamId = "";
+  let isForeignKeyPresent = false;
+  Object.entries(propertyMap.properties).forEach(([key, definition]) => {
+    if (definition.isForeign) {
+      getUrlParam += `/${key}/:id`;
+      getParamId += `const ${key}Id = +req.params.id;`;
+      inParamId += `${key}Id, `;
+
+      isForeignKeyPresent = true;
+    }
+  });
+  inParamId = inParamId.trim().replace(/,\s*$/, "");
 
   const controllerCode = `
   import { Request, Response } from "express";
@@ -52,12 +67,13 @@ export function createControllerFromObjectMap(
       );
     }
 
-    @httpGet("/")
+    @httpGet("${isForeignKeyPresent ? getUrlParam : "/"}")
     async getAll(@request() req: Request, @response() res: Response) {
       try {
+        ${isForeignKeyPresent ? getParamId : ""}
         const ${propertyMap.name.toLowerCase()}List = await this.service${
     propertyMap.name
-  }.getAll();
+  }.getAll(${isForeignKeyPresent ? inParamId : ""});
         this.logger.info("Retrieved ${propertyMap.name.toLowerCase()}List:" + ${propertyMap.name.toLowerCase()}List?.length );
 
         this.setCommonHeaders(res);

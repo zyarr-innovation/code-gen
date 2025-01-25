@@ -1,4 +1,4 @@
-import { IProperty, IPropertyMap } from "../app.common";
+import { capitalizeFirstLetter, IProperty, IPropertyMap } from "../app.common";
 
 export function createRepoModelFromObjectMap(
   propertyMap: IPropertyMap
@@ -6,6 +6,16 @@ export function createRepoModelFromObjectMap(
   const interfaceName = `IRepo${propertyMap.name}`;
   const modelName = `I${propertyMap.name}`;
   const dtoName = `DTO${propertyMap.name}`;
+
+  let getAllParam = "";
+  let isForeignKeyPresent = false;
+  Object.entries(propertyMap.properties).forEach(([key, definition]) => {
+    if (definition.isForeign) {
+      getAllParam += `in${capitalizeFirstLetter(key)}Id: number, `;
+      isForeignKeyPresent = true;
+    }
+  });
+  getAllParam = getAllParam.trim().replace(/,\s*$/, "");
 
   const repositoryInterfaceCode = `
     import { Sequelize, Transaction } from "sequelize";
@@ -15,7 +25,9 @@ export function createRepoModelFromObjectMap(
 
     export interface ${interfaceName} {
       isExist(in${propertyMap.name}Id: number): Promise<boolean>;
-      getAll(): Promise<${modelName} [] | null>;
+      getAll(${
+        isForeignKeyPresent ? getAllParam : ""
+      }): Promise<${modelName} [] | null>;
       getById(in${propertyMap.name}Id: number): Promise<${modelName} | null>;
       create(
         in${propertyMap.name}: ${modelName},
