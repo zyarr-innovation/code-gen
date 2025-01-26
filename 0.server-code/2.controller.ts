@@ -14,8 +14,8 @@ export function createControllerFromObjectMap(
   let isForeignKeyPresent = false;
   Object.entries(propertyMap.properties).forEach(([key, definition]) => {
     if (definition.isForeign) {
-      getUrlParam += `/${key}/:id`;
-      getParamId += `const ${key}Id = +req.params.id;`;
+      getUrlParam += `/${key}/:Id`;
+      getParamId += `const ${key}Id = +req.params.Id;`;
       inParamId += `${key}Id, `;
 
       isForeignKeyPresent = true;

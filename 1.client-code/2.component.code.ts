@@ -19,7 +19,7 @@ export function createComponentCode(
   const generateForeignAttributes = (): string => {
     return Object.entries(propertyMap.properties)
       .filter(([key, prop]) => prop.isForeign)
-      .map(([key]) => `@Input() ${key}Id = 0; `)
+      .map(([key]) => `${key}Id = 0; `)
       .join("\n");
   };
 
@@ -51,7 +51,7 @@ export function createComponentCode(
           .map(
             (eachValue) => `
           on${eachValue}s(${key.toLowerCase()}Id: number) {
-            this.router.navigate(['${eachValue.toLowerCase()}', ${key.toLowerCase()}Id]);
+            this.router.navigate(['${eachValue.toLowerCase()}/${key.toLowerCase()}', ${key.toLowerCase()}Id]);
           }
           `
           )
@@ -125,7 +125,7 @@ export function createComponentCode(
   };
 
   return `import { CommonModule } from '@angular/common';
-  import { Component, Input, OnInit } from '@angular/core';
+  import { Component, OnInit } from '@angular/core';
   import {
     ReactiveFormsModule,
     FormBuilder,
