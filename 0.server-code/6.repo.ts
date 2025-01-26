@@ -65,8 +65,8 @@ export function createRepoImplFromObjectMap(propertyMap: IPropertyMap): string {
     }): Promise<${modelName}[] | null> {
       const ${propertyMap.name}Model = this.getModel(${dtoName});
       const foundObj = await ${propertyMap.name}Model.findAll<${dtoName}>(${
-    isForeignKeyPresent ? whereClause : ""
-  });
+        isForeignKeyPresent ? whereClause : ""
+      });
       return foundObj?.map((eachObj) =>
         this.convertToObject(eachObj.dataValues)
       );

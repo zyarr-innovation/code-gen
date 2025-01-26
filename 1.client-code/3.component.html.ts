@@ -6,19 +6,10 @@ import {
   StringValidation,
 } from "../app.common";
 
-export function createComponentHTML(propertyMap: IPropertyMap): string {
-  const generateForeignButton = (): string => {
-    return Object.entries(propertyMap.properties)
-      .filter(([key, prop]) => prop.isForeign)
-      .map(
-        ([key]) => `
-        <button mat-icon-button color="primary" (click)="show${key}(element.Id)">
-          <mat-icon>list_alt</mat-icon>
-        </button>`
-      )
-      .join("\n");
-  };
-
+export function createComponentHTML(
+  propertyMap: IPropertyMap,
+  relation: { [key: string]: string[] }
+): string {
   const generateTableColumns = (): string => {
     return Object.entries(propertyMap.properties)
       .filter(
@@ -54,6 +45,23 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
       .join("\n");
   };
 
+  const processRelationCode = (): string => {
+    return Object.entries(relation)
+      .filter(([key, value]) => key === propertyMap.name)
+      .map(([key, valueList]) =>
+        valueList
+          .map(
+            (eachValue) => `
+          <button mat-icon-button color="primary" (click)="on${eachValue}s(element.Id)">
+            <mat-icon>list_alt</mat-icon>
+          </button>
+          `
+          )
+          .join("\n")
+      )
+      .join("\n");
+  };
+
   return `<mat-card>
     <mat-card-title>
       <span>${propertyMap.name} Details</span>
@@ -63,7 +71,9 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
     </mat-card-title>
     <mat-card-content>
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
         ${generateTableColumns()}
+
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let element">
@@ -77,7 +87,7 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
             }(element.Id)">
               <mat-icon>delete</mat-icon>
             </button>
-            ${generateForeignButton()}
+            ${processRelationCode()}
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -95,7 +105,9 @@ export function createComponentHTML(propertyMap: IPropertyMap): string {
     </mat-card-title>
     <mat-card-content>
       <form [formGroup]="${propertyMap.name.toLowerCase()}Form" (ngSubmit)="onSubmit()" class="form-container">
+
         ${generateFormFields()}
+
         <div class="form-actions">
           <button mat-raised-button color="primary" type="submit" [disabled]="${propertyMap.name.toLowerCase()}Form.invalid">
             {{ isEditMode ? 'Update' : 'Add' }}

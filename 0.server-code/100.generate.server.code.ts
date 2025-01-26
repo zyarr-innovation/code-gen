@@ -20,7 +20,8 @@ function createFile(filePath: string, codeImpl: string) {
 
 export function generateServerCode(
   targetFolder: string,
-  propertyMap: IPropertyMap
+  propertyMap: IPropertyMap,
+  relation: { [key: string]: string[] }
 ) {
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder, { recursive: true });

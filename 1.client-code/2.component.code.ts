@@ -6,7 +6,10 @@ import {
   StringValidation,
 } from "../app.common";
 
-export function createComponentCode(propertyMap: IPropertyMap): string {
+export function createComponentCode(
+  propertyMap: IPropertyMap,
+  relation: { [key: string]: string[] }
+): string {
   const className = `${propertyMap.name}Component`;
   const modelName = `I${propertyMap.name}`;
   const serviceName = `${propertyMap.name}Service`;
@@ -38,6 +41,23 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
         this.load${propertyMap.name}s();
         this.initForm();
         `;
+  };
+
+  const processRelationCode = (): string => {
+    return Object.entries(relation)
+      .filter(([key, value]) => key === propertyMap.name)
+      .map(([key, valueList]) =>
+        valueList
+          .map(
+            (eachValue) => `
+          on${eachValue}s(${key.toLowerCase()}Id: number) {
+            this.router.navigate(['${eachValue.toLowerCase()}', ${key.toLowerCase()}Id]);
+          }
+          `
+          )
+          .join("\n")
+      )
+      .join("\n");
   };
 
   const generateForeignIds = (): string => {
@@ -195,9 +215,12 @@ export function createComponentCode(propertyMap: IPropertyMap): string {
       });
     }
   
+    ${processRelationCode()}
+
     onSubmit(): void {
       if (this.${propertyMap.name.toLowerCase()}Form.valid) {
-        const ${propertyMap.name.toLowerCase()} = { ...this.${propertyMap.name.toLowerCase()}Form.value, ${generateForeignValues()} };
+        const ${propertyMap.name.toLowerCase()} = { ...this.${propertyMap.name.toLowerCase()}Form.value, 
+          ${generateForeignValues()} };
 
         if (this.isEditMode) {
           this.${propertyMap.name.toLowerCase()}Service.edit(${propertyMap.name.toLowerCase()}).subscribe(() => {

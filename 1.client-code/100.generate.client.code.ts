@@ -17,7 +17,8 @@ function createFile(filePath: string, codeImpl: string) {
 }
 export function generateClientCode(
   targetFolder: string,
-  propertyMap: IPropertyMap
+  propertyMap: IPropertyMap,
+  relation: { [key: string]: string[] }
 ) {
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder, { recursive: true });
@@ -29,15 +30,15 @@ export function generateClientCode(
   const modelFilePath = `${targetFolder}/${objectName}.model.ts`;
   createFile(modelFilePath, generatedModel);
 
-  const generatedValidator = createServiceCode(propertyMap);
+  const generatedValidator = createServiceCode(propertyMap, relation);
   const validatorFileName = `${targetFolder}/${objectName}.service.ts`;
   createFile(validatorFileName, generatedValidator);
 
-  const generatedController = createComponentCode(propertyMap);
+  const generatedController = createComponentCode(propertyMap, relation);
   const controllerFileName = `${targetFolder}/${objectName}.component.ts`;
   createFile(controllerFileName, generatedController);
 
-  const generatedServiceModel = createComponentHTML(propertyMap);
+  const generatedServiceModel = createComponentHTML(propertyMap, relation);
   const serviceModelFileName = `${targetFolder}/${objectName}.component.html`;
   createFile(serviceModelFileName, generatedServiceModel);
 

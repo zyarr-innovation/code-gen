@@ -4,7 +4,10 @@ import {
   EnumValidation,
   capitalizeFirstLetter,
 } from "../app.common";
-export function createServiceCode(propertyMap: IPropertyMap): string {
+export function createServiceCode(
+  propertyMap: IPropertyMap,
+  relation: { [key: string]: string[] }
+): string {
   const interfaceName = propertyMap.name;
   const properties = propertyMap.properties;
   const apiUrl = `http://localhost:3000/v1`;
@@ -36,6 +39,25 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
       .filter(([key, prop]) => prop.isForeign)
       .map(([key]) => `/${key}/\$\{in${capitalizeFirstLetter(key)}Id\}`)
       .join("");
+  };
+
+  const processRelationCode = (): string => {
+    return Object.entries(relation)
+      .filter(([key, value]) => key === propertyMap.name)
+      .map(([key, valueList]) =>
+        valueList
+          .map(
+            (eachValue) => `
+          get(in${key}Id: number): Observable<IStudent> {
+            return this.http.get<IStudent>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}Id}\`, {
+              headers: this.headers,
+            });
+          }
+          `
+          )
+          .join("\n")
+      )
+      .join("\n");
   };
 
   // Generate the service class
@@ -70,11 +92,11 @@ export function createServiceCode(propertyMap: IPropertyMap): string {
       });
     }
 
-    get(in${interfaceName}Id: number): Observable<IStudent> {
-    return this.http.get<IStudent>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}Id}\`, {
-      headers: this.headers,
-    });
-  }
+    get(in${interfaceName}Id: number): Observable<I${interfaceName}> {
+      return this.http.get<I${interfaceName}>(\`\${this.apiUrl}/${interfaceName.toLowerCase()}/\${in${interfaceName}Id}\`, {
+        headers: this.headers,
+      });
+    }
   
     add(in${interfaceName}: I${interfaceName}): Observable<I${interfaceName}> {
       return this.http.post<I${interfaceName}>(

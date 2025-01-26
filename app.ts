@@ -12,7 +12,7 @@ const propertyMapSchool: IPropertyMap = {
       isPrimary: true,
     },
     name: {
-      value: "John Doe",
+      value: "Anjuman Khairul Islam",
       isOptional: false,
       propType: "string",
       validation: { minLength: 3, maxLength: 255, pattern: "^[A-Za-z ]+$" },
@@ -24,7 +24,7 @@ const propertyMapSchool: IPropertyMap = {
       validation: {
         minLength: 16,
         maxLength: 255,
-        pattern: "^[0-9A-Za-z-,.\\ ]+$",
+        pattern: "^[A-Za-z0-9'.-, ]+$",
       },
     },
   },
@@ -62,5 +62,9 @@ const propertyMapStudent: IPropertyMap = {
   },
 };
 
-generateCode(propertyMapSchool);
-generateCode(propertyMapStudent);
+const relation = {
+  School: ["Student"],
+};
+
+generateCode(propertyMapSchool, relation);
+generateCode(propertyMapStudent, relation);

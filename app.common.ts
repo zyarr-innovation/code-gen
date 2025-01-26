@@ -30,6 +30,7 @@ export interface IPropertyMap {
   properties: { [key: string]: IProperty }; // Properties of the interface
 }
 
+
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

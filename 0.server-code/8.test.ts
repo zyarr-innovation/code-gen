@@ -5,16 +5,11 @@ export function generateRestClientCode(propertyMap: IPropertyMap) {
   const baseUrl = `{{baseUrl}}/v1/${entityName}`;
 
   const postPayload = Object.keys(propertyMap.properties)
-    .filter((key) => propertyMap.properties[key].isOptional === false)
+    .filter((key) => !(propertyMap.properties[key].isPrimary == true))
     .reduce((acc, key) => {
       acc[key] = propertyMap.properties[key].value;
       return acc;
     }, {} as Record<string, any>);
-
-  const putPayload = Object.keys(propertyMap.properties).reduce((acc, key) => {
-    acc[key] = key === "Id" ? 5 : `${propertyMap.properties[key].value}0`;
-    return acc;
-  }, {} as Record<string, any>);
 
   return `
   @baseUrl = http://localhost:3000
@@ -62,7 +57,7 @@ Authorization: bearer Token
 
 ${JSON.stringify(
   {
-    ...putPayload,
+    ...postPayload,
   },
   null,
   2
