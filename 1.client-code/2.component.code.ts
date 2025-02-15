@@ -101,7 +101,20 @@ export function createComponentCode(
             );
           }
           if ("pattern" in prop.validation) {
-            validators.push(`Validators.pattern('${prop.validation.pattern}')`);
+            validators.push(`Validators.pattern(/${prop.validation.pattern}/)`);
+          }
+
+          if (prop.propType == "enum") {
+            validators.push(`
+              (control: any) => {
+                return [${(prop.validation as EnumValidation).values
+                  .map((x) => `"${x}"`)
+                  .join(", ")}].includes(
+                  control.value?.toLowerCase().trim()
+                )
+                  ? null
+                  : { invalidData: true };
+              }`);
           }
         }
 

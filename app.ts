@@ -152,15 +152,115 @@ const propertyMapContent: IPropertyMap = {
   },
 };
 
-const relation = {
-  School: ["Standard"],
-  Standard: ["Student", "Subject"],
-  Subject: ["Content"],
+const propertyMapProgress: IPropertyMap = {
+  name: "Progress",
+  properties: {
+    Id: {
+      value: 0,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isPrimary: true,
+    },
+    QuizPercentage: {
+      value: 0,
+      isOptional: false,
+      propType: "number",
+      validation: { min: 0, max: 100 },
+    },
+    FillBlanksPercentage: {
+      value: 0,
+      isOptional: false,
+      propType: "number",
+      validation: { min: 0, max: 100 },
+    },
+    TrueFalsePercentage: {
+      value: 0,
+      isOptional: false,
+      propType: "number",
+      validation: { min: 0, max: 100 },
+    },
+    subject: {
+      value: 0,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isForeign: true,
+    },
+    student: {
+      value: 0,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isForeign: true,
+    },
+    standard: {
+      value: 0,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isForeign: true,
+    },
+    school: {
+      value: 0,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isForeign: true,
+    },
+  },
 };
 
-generateCode(propertyMapSchool, relation);
-generateCode(propertyMapStudent, relation);
+const relation = {
+  School: ["Standard", "Progress"],
+  Standard: ["Subject", "Student", "Progress"],
+  Subject: ["Content", "Progress"],
+  Student: ["Progress"],
+};
 
-generateCode(propertyMapStandard, relation);
-generateCode(propertyMapSubject, relation);
-generateCode(propertyMapContent, relation);
+const propertyLoginDetail: IPropertyMap = {
+  name: "LoginDetail",
+  properties: {
+    Id: {
+      value: 123,
+      isOptional: true,
+      propType: "number",
+      validation: { min: 1, max: 9999 },
+      isPrimary: true,
+    },
+    name: {
+      value: "Admin",
+      isOptional: false,
+      propType: "string",
+      validation: { minLength: 3, maxLength: 255, pattern: "^[A-Za-z ]+$" },
+    },
+    password: {
+      value: "Admin@123",
+      isOptional: false,
+      propType: "string",
+      validation: {
+        minLength: 8,
+        maxLength: 128,
+        pattern: "^[A-Za-z0-9'.\-, ]+$",
+      },
+    },
+    role: {
+      value: "Administrator",
+      isOptional: false,
+      propType: "enum",
+      validation: {
+        values: ["admin", "teacher", "student", "parent"],
+      },
+    },
+  },
+};
+
+// generateCode(propertyMapSchool, relation);
+// generateCode(propertyMapStudent, relation);
+
+// generateCode(propertyMapStandard, relation);
+// generateCode(propertyMapSubject, relation);
+// generateCode(propertyMapContent, relation);
+// generateCode(propertyMapProgress, relation);
+
+generateCode(propertyLoginDetail, {});
