@@ -34,14 +34,27 @@ export function createComponentHTML(
         ([key, prop]) =>
           prop.propType !== "object" && !prop.isPrimary && !prop.isForeign
       )
-      .map(
-        ([key]) => `
-        <mat-form-field appearance="fill">
-          <mat-label>${key.charAt(0).toUpperCase() + key.slice(1)}</mat-label>
-          <input matInput formControlName="${key}" />
-          <mat-error *ngFor="let error of getErrorMessages('${key}')">{{ error }}</mat-error>
-        </mat-form-field>`
-      )
+      .map(([key, prop]) => {
+        if (prop.propType == "enum") {
+          return `
+          <mat-form-field appearance="fill">
+            <mat-label>${key.charAt(0).toUpperCase() + key.slice(1)}</mat-label>
+            <mat-select formControlName="${key}">
+              <mat-option *ngFor="let ${key} of ${key}List" [value]="${key}">{{ ${key} }}</mat-option>
+            </mat-select>
+            <mat-error *ngFor="let error of getErrorMessages('${key}')">{{ error }}</mat-error>
+          </mat-form-field>
+          `;
+        } else {
+          return `
+          <mat-form-field appearance="fill">
+            <mat-label>${key.charAt(0).toUpperCase() + key.slice(1)}</mat-label>
+            <input matInput formControlName="${key}" />
+            <mat-error *ngFor="let error of getErrorMessages('${key}')">{{ error }}</mat-error>
+          </mat-form-field>
+          `;
+        }
+      })
       .join("\n");
   };
 

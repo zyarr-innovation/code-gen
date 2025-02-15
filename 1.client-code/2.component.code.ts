@@ -16,6 +16,18 @@ export function createComponentCode(
   const modelFileName = `${propertyMap.name.toLowerCase()}.model`;
   const serviceFileName = `${propertyMap.name.toLowerCase()}.service`;
 
+  const generateEnumAttributes = (): string => {
+    return Object.entries(propertyMap.properties)
+      .filter(([key, prop]) => prop.propType == "enum")
+      .map(
+        ([key, prop]) =>
+          `${key}List = [${(prop.validation as EnumValidation).values.map(
+            (x) => `"${x}"`
+          )}]; `
+      )
+      .join("\n");
+  };
+
   const generateForeignAttributes = (): string => {
     return Object.entries(propertyMap.properties)
       .filter(([key, prop]) => prop.isForeign)
@@ -107,9 +119,7 @@ export function createComponentCode(
           if (prop.propType == "enum") {
             validators.push(`
               (control: any) => {
-                return [${(prop.validation as EnumValidation).values
-                  .map((x) => `"${x}"`)
-                  .join(", ")}].includes(
+                return this.${key}List.includes(
                   control.value?.toLowerCase().trim()
                 )
                   ? null
@@ -171,7 +181,8 @@ export function createComponentCode(
   })
   export class ${className} implements OnInit {
     ${generateForeignAttributes()}
-    
+    ${generateEnumAttributes()}
+
     displayedColumns: string[] = [${generateDisplayedColumns()}, 'actions'];
     dataSource: ${modelName}[] = [];
     isFormVisible = false;
@@ -257,6 +268,7 @@ export function createComponentCode(
           minlength: 'Too short.',
           maxlength: 'Too long.',
           pattern: 'Invalid format.',
+          invalidData: 'invalid Data'
         };
         return Object.keys(control.errors || {}).map((key) => errors[key]);
       }
