@@ -175,6 +175,7 @@ export function createComponentCode(
       ReactiveFormsModule,
       MatFormFieldModule,
       MatInputModule,
+      MatOptionModule,
     ],
     templateUrl: './${propertyMap.name.toLowerCase()}.component.html',
     styleUrls: ['./${propertyMap.name.toLowerCase()}.component.css'],
