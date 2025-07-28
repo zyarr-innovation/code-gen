@@ -10,12 +10,32 @@ import { createRepoModelFromObjectMap } from "./5.repo.model";
 import { createRepoImplFromObjectMap } from "./6.repo";
 import { createDtoModelFromObjectMap } from "./7.dto.model";
 import { generateRestClientCode } from "./8.test";
+import {
+  createContainerBase,
+  createContainerFromObjectMap,
+} from "./90..container";
+import {
+  createContainerTypeBase,
+  createContainerTypesFromObjectMap,
+} from "./91.container-types";
+import { createInitModelBase, createInitModelsFromObjectMap } from "./92.init-models";
 
 function createFile(filePath: string, codeImpl: string) {
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
   }
   fs.writeFileSync(filePath, codeImpl);
+}
+
+function appendFile(filePath: string, codeImpl: string, codeBase: string) {
+  var existingCode = "";
+  if (fs.existsSync(filePath)) {
+    existingCode = fs.readFileSync(filePath).toString();
+  } else {
+    existingCode = codeBase;
+  }
+  existingCode = existingCode + "\n\n\n" + codeImpl;
+  fs.writeFileSync(filePath, existingCode);
 }
 
 export function generateServerCode(
@@ -58,6 +78,26 @@ export function generateServerCode(
   const generatedDtoModel = createDtoModelFromObjectMap(propertyMap);
   const dtoFileName = `${targetFolder}/7.dto.model.ts`;
   createFile(dtoFileName, generatedDtoModel);
+
+  const generatedContainer = createContainerFromObjectMap(propertyMap);
+  const containerFileName = `${targetFolder}/../container.ts`;
+  const generatedContainerBase = createContainerBase();
+  appendFile(containerFileName, generatedContainer, generatedContainerBase);
+
+  const generatedContainerTypes =
+    createContainerTypesFromObjectMap(propertyMap);
+  const containerTypesFileName = `${targetFolder}/../container-types.ts`;
+  const generatedContainerTypesBase = createContainerTypeBase();
+  appendFile(
+    containerTypesFileName,
+    generatedContainerTypes,
+    generatedContainerTypesBase
+  );
+
+  const generatedInitModel = createInitModelsFromObjectMap(propertyMap);
+  const initModelFileName = `${targetFolder}/../init-models.ts`;
+  const generatedInitModelBase = createInitModelBase();
+  appendFile(initModelFileName, generatedInitModel, generatedInitModelBase);
 
   const generatedRestClient = generateRestClientCode(propertyMap);
   const restClientFileName = `${targetFolder}/8.test.rest`;
